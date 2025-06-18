@@ -1,115 +1,230 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Asistencia al Cumpleaños de Karla</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Razones</title>
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
+      background-color: #111;
+      color: white;
       text-align: center;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 0;
+      overflow: hidden;
     }
-    header {
-      background-color: #ffb6c1;
-      padding: 20px;
+
+    #inicio {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #111;
     }
+
     h1 {
-      margin: 0;
-      color: #333;
+      font-size: 2.5rem;
     }
-    main {
-      padding: 40px 20px;
-    }
-    #counter {
-      font-size: 3em;
-      margin: 20px 0;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1em;
-      cursor: pointer;
-      background-color: #ff69b4;
+
+    button#startBtn, button#seguirBtn {
+      margin-top: 20px;
+      padding: 15px 30px;
+      background-color: purple;
+      color: white;
       border: none;
       border-radius: 5px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    #seguirBtn {
+      display: none;
+    }
+
+    .emoji {
+      position: fixed;
+      top: -30px;
+      font-size: 2rem;
+      animation: fall linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh);
+      }
+    }
+
+    #contenido {
+      display: none;
+      background-color: black;
+      padding: 50px 20px;
+    }
+
+    .razon {
+      font-size: 1.5rem;
+      margin: 20px 0;
+      opacity: 0;
+      transition: opacity 1s;
+    }
+
+    .razon.mostrar {
+      opacity: 1;
+    }
+
+    #preguntaFinal {
+      display: none;
+      margin-top: 50px;
+    }
+
+    #preguntaFinal h2 {
+      font-size: 2rem;
+    }
+
+    #preguntaFinal p {
+      font-size: 1rem;
+      color: #aaa;
+    }
+
+    .botones {
+      margin-top: 20px;
+    }
+
+    .botones button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      margin: 0 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #333;
       color: white;
     }
-    button:hover {
-      background-color: #ff85bf;
+
+    #leyendaFinal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.95);
+      color: white;
+      font-size: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>¿Vas a ir al cumple de Karla?</h1>
-  </header>
-  <main>
-    <p>Contador de asistentes:</p>
-    <div id="counter">0</div>
-    <button id="joinButton">¡Voy a ir!</button>
-  </main>
+  <div id="inicio">
+    <h1>Razones del por qué deberías decirme</h1>
+    <button id="startBtn">Empezar</button>
+  </div>
 
-  <!-- Importamos Firebase (versión compat para simplicidad) -->
-  <!-- Firebase App (core) -->
-  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-  <!-- Firestore -->
-  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+  <div id="contenido">
+    <div id="razones"></div>
+    <button id="seguirBtn">Seguir</button>
+    <div id="preguntaFinal">
+      <h2>¿Me vas a decir?</h2>
+      <p>Te reto que pongas que no</p>
+      <div class="botones">
+        <button id="btnSi">Sí</button>
+        <button id="btnNo">No</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="leyendaFinal">Sabía que dirías que no ❤️</div>
 
   <script>
-    // Configuración de Firebase: reemplaza estos datos con los de tu proyecto.
-    var firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_PROYECTO.firebaseapp.com",
-      projectId: "TU_PROYECTO",
-      storageBucket: "TU_PROYECTO.appspot.com",
-      messagingSenderId: "TU_MENSAJERÍA",
-      appId: "TU_APP_ID"
-    };
+    const startBtn = document.getElementById('startBtn');
+    const seguirBtn = document.getElementById('seguirBtn');
+    const inicio = document.getElementById('inicio');
+    const contenido = document.getElementById('contenido');
+    const razones = document.getElementById('razones');
+    const leyendaFinal = document.getElementById('leyendaFinal');
+    const btnNo = document.getElementById('btnNo');
+    const btnSi = document.getElementById('btnSi');
+    const preguntaFinal = document.getElementById('preguntaFinal');
 
-    // Inicializa Firebase
-    firebase.initializeApp(firebaseConfig);
-    var db = firebase.firestore();
+    const lista = [
+      'Me harías muy feliz',
+      'Te voy a besar mucho',
+      'Me quitarías la curiosidad que tengo',
+      'Te quitarías la ansiedad de decirme xd',
+      '¿Ya mencioné que me harías muy feliz?',
+      'Y namás porque sí jajajaja'
+    ];
 
-    // Referencia del documento donde se almacenará el contador.
-    var docRef = db.collection("assistances").doc("karlaBirthday");
+    const posiciones = [
+      { top: '0px', left: '0px' },
+      { top: '0px', left: '60%' },
+      { top: '50px', left: '20%' },
+      { top: '20px', left: '80%' },
+      { top: '10px', left: '40%' }
+    ];
 
-    // Función para actualizar la visualización del contador.
-    function updateCounterDisplay(count) {
-      document.getElementById('counter').innerText = count;
+    let emojiInterval;
+    let emojiLluviaActiva = true;
+    let razonIndex = 0;
+
+    function lluviaEmoji() {
+      if (!emojiLluviaActiva) return;
+      const emoji = document.createElement('div');
+      emoji.classList.add('emoji');
+      emoji.style.left = Math.random() * 100 + 'vw';
+      emoji.textContent = '❤️';
+      emoji.style.animationDuration = Math.random() * 3 + 2 + 's';
+      document.body.appendChild(emoji);
+      setTimeout(() => emoji.remove(), 5000);
     }
 
-    // Obtenemos el valor inicial del contador desde Firestore.
-    docRef.get().then((doc) => {
-      if (doc.exists) {
-        var currentCount = doc.data().count;
-        updateCounterDisplay(currentCount);
-      } else {
-        // Si el documento no existe, lo creamos e inicializamos el contador en 0.
-        docRef.set({ count: 0 });
+    function mostrarSiguienteRazon() {
+      if (razonIndex >= lista.length) {
+        seguirBtn.style.display = 'none';
+        emojiLluviaActiva = false;
+        clearInterval(emojiInterval);
+        setTimeout(() => {
+          preguntaFinal.style.display = 'block';
+        }, 1000);
+        return;
       }
-    }).catch((error) => {
-      console.error("Error al obtener el documento: ", error);
+      const r = document.createElement('div');
+      r.className = 'razon';
+      r.textContent = '* ' + lista[razonIndex];
+      razones.appendChild(r);
+      setTimeout(() => r.classList.add('mostrar'), 100);
+      razonIndex++;
+    }
+
+    startBtn.addEventListener('click', () => {
+      inicio.style.display = 'none';
+      contenido.style.display = 'block';
+      emojiLluviaActiva = true;
+      emojiInterval = setInterval(lluviaEmoji, 300);
+      seguirBtn.style.display = 'inline-block';
+      mostrarSiguienteRazon();
     });
 
-    // Al hacer clic en el botón, se actualiza el contador.
-    document.getElementById('joinButton').addEventListener('click', () => {
-      // Usamos una transacción para evitar condiciones de carrera.
-      db.runTransaction((transaction) => {
-        return transaction.get(docRef).then((doc) => {
-          if (!doc.exists) {
-            throw "El documento no existe!";
-          }
-          var newCount = doc.data().count + 1;
-          transaction.update(docRef, { count: newCount });
-          return newCount;
-        });
-      }).then((newCount) => {
-        updateCounterDisplay(newCount);
-      }).catch((error) => {
-        console.error("Error al actualizar el contador: ", error);
-      });
+    seguirBtn.addEventListener('click', () => {
+      mostrarSiguienteRazon();
+    });
+
+    btnSi.addEventListener('click', () => {
+      leyendaFinal.style.display = 'flex';
+    });
+
+    let posIndex = 0;
+    btnNo.addEventListener('mouseover', () => {
+      const pos = posiciones[posIndex % posiciones.length];
+      btnNo.style.position = 'absolute';
+      btnNo.style.top = pos.top;
+      btnNo.style.left = pos.left;
+      posIndex++;
     });
   </script>
 </body>
